@@ -1,0 +1,30 @@
+spring:
+#Datasource configuration
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://127.0.0.1:5432/wslogin
+    username: postgres
+    password: password
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 5
+#Jackson configuration
+  jackson:
+    date-format: java.text.SimpleDateFormat
+    mapper:
+      pretty-print: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      naming:
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+    show-sql: false
+#Liquibase configuration
+liquibase:
+  change-log: classpath:/liquibase/db.changelog-master.xml
+  drop-first: false
+  enabled: true
+  url: jdbc:postgresql://127.0.0.1:5432/wslogin
+  user: postgres
+  password: password

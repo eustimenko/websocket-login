@@ -1,0 +1,20 @@
+#Disbale Spring banner
+spring:
+# H2
+  h2:
+    console:
+      enabled: false
+# Datasource
+  datasource:
+    url: jdbc:hsqldb:mem:thymeleaf
+    username: sa
+    password:
+    driver-class-name: org.hsqldb.jdbcDriver
+#Liquibase configuration
+liquibase:
+  change-log: classpath:/liquibase/db.changelog-master.xml
+  drop-first: false
+  enabled: true
+  url: jdbc:hsqldb:mem:thymeleaf
+  user: sa
+  password:

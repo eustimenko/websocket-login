@@ -1,0 +1,31 @@
+# Package Files
+*.jar
+*.war
+*.ear
+
+# Log files
+*.log
+
+# Idea project
+.idea/
+*.iml
+
+# Max OS artefacts
+.DS_Store
+
+# Gradle
+gradlew
+gradlew.bat
+/gradle
+/.gradle
+/build
+*/gradle
+*/.gradle
+*/build
+.gradletasknamecache
+
+# Web
+/web/dist/public/css
+/web/dist/public/js
+/web/dist/public/fonts
+/web/node_modules

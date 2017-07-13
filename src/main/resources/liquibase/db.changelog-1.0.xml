@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+    <changeSet id="15082016-1" author="ustimenko">
+        <createTable tableName="user">
+            <column name="id" type="BIGINT" autoIncrement="true" incrementBy="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="email" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="user" columnNames="email" constraintName="unique_email"/>
+
+        <rollback>
+            <dropTable tableName="user" cascadeConstraints="true"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="27062017-1" author="ustimenko">
+        <createTable tableName="token">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expired_date" type="TIMESTAMP" valueDate="${now}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="token" columnNames="token" constraintName="unique_token"/>
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="token"
+                                 constraintName="fk_token_user"
+                                 onDelete="CASCADE"
+                                 onUpdate="RESTRICT"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user"/>
+
+        <rollback>
+            <dropTable tableName="token" cascadeConstraints="true"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="27062017-2" author="ustimenko">
+        <dropUniqueConstraint constraintName="fk_token_user" tableName="token"/>
+        <addPrimaryKey columnNames="token" constraintName="pk_token" tableName="token"/>
+
+        <rollback>
+            <addUniqueConstraint tableName="token" columnNames="token" constraintName="unique_token"/>
+            <dropPrimaryKey constraintName="pk_token" tableName="token"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
