@@ -1,4 +1,4 @@
-package com.eustimenko.portfolio.ws.auth.api.request.data;
+package com.eustimenko.portfolio.ws.auth.api.request.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

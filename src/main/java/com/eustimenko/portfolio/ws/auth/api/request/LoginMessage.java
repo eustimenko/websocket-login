@@ -1,19 +1,15 @@
 package com.eustimenko.portfolio.ws.auth.api.request;
 
-import com.eustimenko.portfolio.ws.auth.api.request.data.LoginCredentials;
+import com.eustimenko.portfolio.ws.auth.api.request.dto.LoginCredentials;
 import com.eustimenko.portfolio.ws.auth.api.request.type.TYPE_OF_MESSAGE;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.util.StringUtils;
 
 public class LoginMessage extends Message {
 
     private LoginCredentials data;
 
     public LoginMessage() {
-    }
-
-    public LoginMessage(String sequenceId, LoginCredentials data) {
-        super(TYPE_OF_MESSAGE.LOGIN_CUSTOMER, sequenceId);
-        this.data = data;
     }
 
     public LoginCredentials getData() {
@@ -25,7 +21,14 @@ public class LoginMessage extends Message {
     }
 
     @JsonIgnore
-    public boolean isCorrect() {
-        return type == TYPE_OF_MESSAGE.LOGIN_CUSTOMER;
+    public boolean isIncorrect() {
+        return type != TYPE_OF_MESSAGE.LOGIN_CUSTOMER;
+    }
+
+    @JsonIgnore
+    public boolean hasNoData(){
+        return data == null
+        || StringUtils.isEmpty(data.getEmail())
+        || StringUtils.isEmpty(data.getPassword());
     }
 }

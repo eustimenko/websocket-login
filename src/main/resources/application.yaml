@@ -1,4 +1,6 @@
 spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration
 #Datasource configuration
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -9,10 +11,6 @@ spring:
       connection-timeout: 60000
       maximum-pool-size: 5
 #Jackson configuration
-  jackson:
-    date-format: java.text.SimpleDateFormat
-    mapper:
-      pretty-print: true
   jpa:
     hibernate:
       ddl-auto: validate

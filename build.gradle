@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.4.RELEASE'
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:"+springBootVersion
     }
 }
 
@@ -19,7 +19,7 @@ group = 'com.eustimenko.portfolio'
 version = '1.0'
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.0'
+    gradleVersion = wrapperVersion
 }
 
 apply plugin: 'java'
@@ -46,7 +46,7 @@ jacocoTestReport {
 
 dependencyManagement {
     imports {
-        mavenBom 'org.springframework.boot:spring-boot-starter-parent:1.5.4.RELEASE'
+        mavenBom "org.springframework.boot:spring-boot-starter-parent:"+springBootVersion
     }
 }
 
@@ -66,7 +66,7 @@ dependencies {
     compile 'org.hibernate:hibernate-java8'
     compile 'com.zaxxer:HikariCP'
 
-    compile 'org.postgresql:postgresql:9.4.1209.jre7'
+    compile "org.postgresql:postgresql:"+postgresqlVesrion
     compile 'org.hsqldb:hsqldb'
 
     testCompile 'org.springframework.boot:spring-boot-starter-test'

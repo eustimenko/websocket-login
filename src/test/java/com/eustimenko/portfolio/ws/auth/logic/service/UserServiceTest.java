@@ -20,7 +20,7 @@ public class UserServiceTest {
     private UserService service;
 
     @Test
-    public void getValidUserToken() throws Exception {
+    public void getActualUserToken() throws Exception {
         User user = new User("admin@admin.com", "test");
         given(service.getUserByEmail("admin@admin.com")).willReturn(user);
 

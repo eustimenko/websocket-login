@@ -15,14 +15,18 @@ import java.util.NoSuchElementException;
 @Transactional
 public class DefaultUserService implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    private final TokenRepository tokenRepository;
+
+    private final TokenEncryptor generator;
 
     @Autowired
-    private TokenRepository tokenRepository;
-
-    @Autowired
-    private TokenEncryptor generator;
+    public DefaultUserService(UserRepository userRepository, TokenRepository tokenRepository, TokenEncryptor generator) {
+        this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
+        this.generator = generator;
+    }
 
     public User getUserByEmail(String email) throws NoSuchElementException {
         return userRepository.findByEmail(email);
@@ -30,21 +34,19 @@ public class DefaultUserService implements UserService {
 
     public Token getActualUserToken(User user) {
         Token token = tokenRepository.getTokenByUser(user.getEmail());
-
-        if (token != null && token.isExpired()) {
-            expireToken(token);
-        } else {
-            token = generator.generateNewToken(user);
-        }
-
-        token = tokenRepository.save(token);
-        Hibernate.initialize(token.getUser());
-
+        token = token == null ? newToken(user) : expireAndGetNew(token, user);
         return token;
     }
 
-    private void expireToken(Token token) {
+    private Token newToken(User user) {
+        final Token token = tokenRepository.save(generator.generateNewToken(user));
+        Hibernate.initialize(token.getUser());
+        return token;
+    }
+
+    private Token expireAndGetNew(Token token, User user) {
         token.setExpiredDate(LocalDateTime.now());
         tokenRepository.save(token);
+        return newToken(user);
     }
 }

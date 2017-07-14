@@ -1,14 +1,13 @@
 package com.eustimenko.portfolio.ws.auth.api.controller;
 
 import com.eustimenko.portfolio.ws.auth.api.request.*;
-import com.eustimenko.portfolio.ws.auth.api.request.data.*;
+import com.eustimenko.portfolio.ws.auth.api.request.dto.*;
 import com.eustimenko.portfolio.ws.auth.logic.service.UserService;
 import com.eustimenko.portfolio.ws.auth.persistent.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 
 import java.util.NoSuchElementException;
 
@@ -30,32 +29,35 @@ public class AuthController {
     public Message auth(LoginMessage message) throws NoSuchElementException {
 
         if (message == null || message.hasNoSequence()) {
-            return new ErrorMessage(null, ERROR.MESSAGE_IS_NULL);
-        }
-        if (!message.isCorrect()) {
-            return new ErrorMessage(message.getSequenceId(), ERROR.TYPE_IS_INCORRECT);
-        }
-        //TODO: hasData()
-        if (message.getData() == null) {
-            return new ErrorMessage(message.getSequenceId(), ERROR.DATA_IS_INCORRECT);
+            return ErrorMessage.nullMessageError();
         }
 
-        final String email = message.getData().getEmail();
-        final String password = message.getData().getPassword();
+        final String sequenceId = message.getSequenceId();
+        if (message.isIncorrect()) {
+            return ErrorMessage.typeError(sequenceId);
+        }
 
-        if (StringUtils.isEmpty(email) || StringUtils.isEmpty(password)) {
-            return new ErrorMessage(message.getSequenceId(), ERROR.DATA_IS_INCORRECT);
+        if (message.hasNoData()) {
+            return ErrorMessage.dataError(sequenceId);
         }
 
         try {
-            final User user = userService.getUserByEmail(email);
-            if (passwordEncoder.matches(password, user.getPassword())) {
-                return new SuccessMessage(message.getSequenceId(), new Token(userService.getActualUserToken(user)));
-            } else {
-                return new ErrorMessage(message.getSequenceId(), ERROR.PASSWORD_IS_INCORRECT);
-            }
+            return processCredentials(message.getData(), sequenceId);
         } catch (NoSuchElementException e) {
-            return new ErrorMessage(message.getSequenceId(), ERROR.CUSTOMER_NOT_FOUND);
+            return processError(sequenceId);
         }
+    }
+
+    private Message processCredentials(LoginCredentials credentials, String s){
+        final User user = userService.getUserByEmail(credentials.getEmail());
+        if (passwordEncoder.matches(credentials.getPassword(), user.getPassword())) {
+            return new SuccessMessage(new Token(userService.getActualUserToken(user)), s);
+        } else {
+            return ErrorMessage.passwordError(s);
+        }
+    }
+
+    private Message processError(String s){
+        return ErrorMessage.customerNotFoundError(s);
     }
 }

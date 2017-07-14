@@ -1,14 +1,13 @@
-package com.eustimenko.portfolio.ws.auth.api;
+package com.eustimenko.portfolio.ws.auth;
 
 import com.eustimenko.portfolio.ws.auth.api.configuration.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.context.annotation.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+@SpringBootApplication
 @Import(
         {
                 FilterConfiguration.class,

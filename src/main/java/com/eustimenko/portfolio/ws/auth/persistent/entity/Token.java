@@ -47,9 +47,4 @@ public class Token implements Serializable {
     public void setExpiredDate(LocalDateTime expiredDate) {
         this.expiredDate = expiredDate;
     }
-
-    @Transient
-    public boolean isExpired() {
-        return expiredDate.isBefore(LocalDateTime.now());
-    }
 }
