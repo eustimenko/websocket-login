@@ -4,7 +4,6 @@ spring:
   jackson:
     serialization:
       indent_output: true
-#Datasource configuration
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://127.0.0.1:5432/wslogin
@@ -13,7 +12,6 @@ spring:
     hikari:
       connection-timeout: 60000
       maximum-pool-size: 5
-#Jackson configuration
   jpa:
     hibernate:
       ddl-auto: validate
@@ -21,7 +19,7 @@ spring:
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
         physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
     show-sql: false
-#Liquibase configuration
+
 liquibase:
   change-log: classpath:/liquibase/db.changelog-master.xml
   drop-first: false
@@ -29,3 +27,4 @@ liquibase:
   url: jdbc:postgresql://127.0.0.1:5432/wslogin
   user: postgres
   password: password
+  contexts: PROD

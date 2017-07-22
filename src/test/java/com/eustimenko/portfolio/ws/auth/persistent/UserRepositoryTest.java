@@ -28,7 +28,7 @@ public class UserRepositoryTest {
         final User user = new User(email, "$2a$10$dTLh8sSdqkQVpoL31tt9renepDKsFNLKwkJdjEbg5uQV2kli0C2qu");
         em.persist(user);
 
-        final User actual = repository.findByEmail(email);
+        final User actual = repository.findByEmail("AdmiN@adMin.com");
         assertNotNull(actual);
         assertEquals(user.getId(), actual.getId());
     }

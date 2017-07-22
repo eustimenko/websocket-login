@@ -37,11 +37,12 @@ dependencies {
     compile 'org.hibernate:hibernate-ehcache'
     compile 'org.hibernate:hibernate-java8'
     compile 'com.zaxxer:HikariCP'
+    runtime 'org.liquibase:liquibase-core'
 
     compile "org.postgresql:postgresql:" + postgresqlVesrion
-    compile 'org.hsqldb:hsqldb'
 
     testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testRuntime 'org.hsqldb:hsqldb:2.4.0'
 }
 jacocoTestReport {
     reports {

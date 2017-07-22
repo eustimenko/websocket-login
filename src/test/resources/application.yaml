@@ -4,25 +4,19 @@ spring:
   jackson:
     serialization:
       indent_output: true
-# H2
+  datasource:
+    driver-class-name: org.hsqldb.jdbcDriver
+    generate-unique-name: true
+  jpa:
+      hibernate:
+        dialect: org.hibernate.dialect.HSQLDialect
+        ddl-auto: validate
+      show-sql: true
   h2:
     console:
       enabled: false
-# Datasource
-  datasource:
-    url: jdbc:hsqldb:mem:thymeleaf
-    username: sa
-    password:
-    driver-class-name: org.hsqldb.jdbcDriver
-  jpa:
-      hibernate:
-        ddl-auto: update
-      show-sql: true
-#Liquibase configuration
+
 liquibase:
   change-log: classpath:/liquibase/db.changelog-master.xml
-  drop-first: false
-  enabled: true
-  url: jdbc:hsqldb:mem:thymeleaf
-  user: sa
-  password:
+  drop-first: true
+  contexts: QA

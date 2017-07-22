@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends SimpleJpaRepository<User, Long> {
 
-    @Query("SELECT u FROM User u WHERE lower(u.email)=lower(:email)")
+    @Query("SELECT u FROM User u WHERE u.email=:email")
     User findByEmail(@Param("email") String email);
 }

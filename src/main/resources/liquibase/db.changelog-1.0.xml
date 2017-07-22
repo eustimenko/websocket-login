@@ -3,17 +3,28 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
-    <changeSet id="15082016-1" author="ustimenko">
+    <changeSet id="5" author="ustimenko" context="QA">
+        <comment>Modify test database to be case insensitive</comment>
+
+        <sql>
+            SET DATABASE SQL SYNTAX PGS TRUE;
+            SET DATABASE COLLATION SQL_TEXT_UCC;
+        </sql>
+    </changeSet>
+
+    <changeSet id="1" author="ustimenko" context="PROD, QA">
+        <comment>Craete user table</comment>
+
         <createTable tableName="user">
             <column name="id" type="BIGINT" autoIncrement="true" incrementBy="1">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="email" type="VARCHAR(256)">
+            <column name="email" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="password" type="VARCHAR(256)">
+            <column name="password" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -25,12 +36,14 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="27062017-1" author="ustimenko">
+    <changeSet id="2" author="ustimenko" context="PROD, QA">
+        <comment>Create token table</comment>
+
         <createTable tableName="token">
             <column name="user_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="token" type="VARCHAR(256)">
+            <column name="token" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="expired_date" type="TIMESTAMP" valueDate="${now}">
@@ -53,13 +66,33 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="27062017-2" author="ustimenko">
+    <changeSet id="3" author="ustimenko" context="PROD, QA">
+        <comment>Modify constraints</comment>
+
         <dropUniqueConstraint constraintName="fk_token_user" tableName="token"/>
         <addPrimaryKey columnNames="token" constraintName="pk_token" tableName="token"/>
 
         <rollback>
             <addUniqueConstraint tableName="token" columnNames="token" constraintName="unique_token"/>
             <dropPrimaryKey constraintName="pk_token" tableName="token"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="4" author="ustimenko" context="PROD">
+        <comment>Create PSQL citext extension</comment>
+
+        <sql>
+            CREATE EXTENSION citext;
+        </sql>
+    </changeSet>
+
+    <changeSet id="6" author="ustimenko" context="PROD, QA">
+        <comment>Modify test database to be case insensitive</comment>
+
+        <modifyDataType tableName="user" columnName="email" newDataType="CITEXT"/>
+
+        <rollback>
+            <modifyDataType tableName="user" columnName="email" newDataType="VARCHAR(255)"/>
         </rollback>
     </changeSet>
 </databaseChangeLog>
