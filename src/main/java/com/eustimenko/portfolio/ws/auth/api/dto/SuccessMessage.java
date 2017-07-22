@@ -1,6 +1,6 @@
-package com.eustimenko.portfolio.ws.auth.api.request;
+package com.eustimenko.portfolio.ws.auth.api.dto;
 
-import com.eustimenko.portfolio.ws.auth.api.request.dto.Token;
+import com.eustimenko.portfolio.ws.auth.api.dto.type.Token;
 import com.fasterxml.jackson.annotation.*;
 
 public class SuccessMessage extends Message<Token> {

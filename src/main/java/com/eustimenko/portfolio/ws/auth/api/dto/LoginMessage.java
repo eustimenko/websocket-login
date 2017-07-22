@@ -1,6 +1,6 @@
-package com.eustimenko.portfolio.ws.auth.api.request;
+package com.eustimenko.portfolio.ws.auth.api.dto;
 
-import com.eustimenko.portfolio.ws.auth.api.request.dto.LoginCredentials;
+import com.eustimenko.portfolio.ws.auth.api.dto.type.LoginCredentials;
 import com.fasterxml.jackson.annotation.*;
 import org.springframework.util.StringUtils;
 

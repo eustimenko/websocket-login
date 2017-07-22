@@ -1,8 +1,8 @@
 package com.eustimenko.portfolio.ws.auth.api.controller;
 
+import com.eustimenko.portfolio.ws.auth.api.dto.*;
+import com.eustimenko.portfolio.ws.auth.api.dto.type.*;
 import com.eustimenko.portfolio.ws.auth.api.exception.*;
-import com.eustimenko.portfolio.ws.auth.api.request.*;
-import com.eustimenko.portfolio.ws.auth.api.request.dto.*;
 import com.eustimenko.portfolio.ws.auth.logic.service.UserService;
 import com.eustimenko.portfolio.ws.auth.persistent.entity.User;
 import com.fasterxml.jackson.databind.*;

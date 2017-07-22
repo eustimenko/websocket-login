@@ -1,6 +1,6 @@
-package com.eustimenko.portfolio.ws.auth.api.request;
+package com.eustimenko.portfolio.ws.auth.api.dto;
 
-import com.eustimenko.portfolio.ws.auth.api.request.dto.ERROR;
+import com.eustimenko.portfolio.ws.auth.api.dto.type.ERROR;
 import com.fasterxml.jackson.annotation.*;
 
 public class ErrorMessage extends Message<ERROR> {

@@ -1,4 +1,4 @@
-package com.eustimenko.portfolio.ws.auth.api.request.dto;
+package com.eustimenko.portfolio.ws.auth.api.dto.type;
 
 public enum ERROR {
 
