@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="org/springframework/boot/logging/logback/base.xml" />
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
 
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>api.log</file>
+    <appender name="SERVICE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${user.home}/logs/service.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${user.home}/archive/service/%d{yyyy-MM-dd}/service-%d{yyyy-MM-dd_HH-mm,aux}.log.gz
+            </fileNamePattern>
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
 
         <encoder>
             <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
@@ -17,8 +24,8 @@
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="SERVICE"/>
     </root>
 
 </configuration>

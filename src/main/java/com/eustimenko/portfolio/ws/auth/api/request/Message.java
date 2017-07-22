@@ -1,42 +1,49 @@
 package com.eustimenko.portfolio.ws.auth.api.request;
 
-import com.eustimenko.portfolio.ws.auth.api.request.type.TYPE_OF_MESSAGE;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.*;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 
-public class Message implements Serializable {
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type",
+        visible = true)
+@JsonSubTypes(value = {
+        @JsonSubTypes.Type(value = LoginMessage.class, name = Message.Types.LOGIN_CUSTOMER),
+        @JsonSubTypes.Type(value = ErrorMessage.class, name = Message.Types.CUSTOMER_ERROR),
+        @JsonSubTypes.Type(value = SuccessMessage.class, name = Message.Types.CUSTOMER_API_TOKEN)
+})
+public abstract class Message<DATA_TYPE> implements Serializable {
 
-    TYPE_OF_MESSAGE type;
-    private String sequenceId;
+    private final String sequenceId;
+    final DATA_TYPE data;
 
-    public Message() {
-    }
-
-    Message(TYPE_OF_MESSAGE type, String sequenceId) {
-        this.type = type;
+    @JsonCreator
+    Message(@JsonProperty("sequenceId") String sequenceId, @JsonProperty("data") DATA_TYPE data) {
         this.sequenceId = sequenceId;
-    }
-
-    public TYPE_OF_MESSAGE getType() {
-        return type;
-    }
-
-    public void setType(TYPE_OF_MESSAGE type) {
-        this.type = type;
+        this.data = data;
     }
 
     public String getSequenceId() {
         return sequenceId;
     }
 
-    public void setSequenceId(String sequenceId) {
-        this.sequenceId = sequenceId;
+    public DATA_TYPE getData() {
+        return data;
     }
 
     @JsonIgnore
     public boolean hasNoSequence() {
         return StringUtils.isEmpty(sequenceId);
+    }
+
+    public interface Types {
+
+        String LOGIN_CUSTOMER = "LOGIN_CUSTOMER";
+        String CUSTOMER_API_TOKEN = "CUSTOMER_API_TOKEN";
+        String CUSTOMER_ERROR = "CUSTOMER_ERROR";
     }
 }

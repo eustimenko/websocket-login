@@ -1,36 +1,21 @@
 package com.eustimenko.portfolio.ws.auth.api.request;
 
 import com.eustimenko.portfolio.ws.auth.api.request.dto.ERROR;
-import com.eustimenko.portfolio.ws.auth.api.request.type.TYPE_OF_MESSAGE;
+import com.fasterxml.jackson.annotation.*;
 
-public class ErrorMessage extends Message {
+public class ErrorMessage extends Message<ERROR> {
 
-    private ERROR data;
-
-    public ErrorMessage() {
-    }
-
-    private ErrorMessage(ERROR data, String sequenceId) {
-        super(TYPE_OF_MESSAGE.CUSTOMER_ERROR, sequenceId);
-        this.data = data;
+    @JsonCreator
+    public ErrorMessage(@JsonProperty("sequenceId") String sequenceId, @JsonProperty("data") ERROR data) {
+        super(sequenceId, data);
     }
 
     private ErrorMessage(ERROR data) {
-        this(data, null);
+        this(null, data);
     }
 
-    public ERROR getData() {
-        return data;
-    }
-
-    public void setData(ERROR data) {
-        this.data = data;
-    }
-
-
-
-    public static ErrorMessage typeError(String s) {
-        return new ErrorMessage(ERROR.TYPE_IS_INCORRECT, s);
+    public static ErrorMessage typeError() {
+        return new ErrorMessage(ERROR.TYPE_IS_INCORRECT);
     }
 
     public static ErrorMessage nullMessageError() {
@@ -38,14 +23,14 @@ public class ErrorMessage extends Message {
     }
 
     public static ErrorMessage dataError(String s) {
-        return new ErrorMessage(ERROR.DATA_IS_INCORRECT, s);
+        return new ErrorMessage(s, ERROR.DATA_IS_INCORRECT);
     }
 
     public static ErrorMessage customerNotFoundError(String s) {
-        return new ErrorMessage(ERROR.CUSTOMER_NOT_FOUND, s);
+        return new ErrorMessage(s, ERROR.CUSTOMER_NOT_FOUND);
     }
 
     public static ErrorMessage passwordError(String s) {
-        return new ErrorMessage(ERROR.PASSWORD_IS_INCORRECT, s);
+        return new ErrorMessage(s, ERROR.PASSWORD_IS_INCORRECT);
     }
 }

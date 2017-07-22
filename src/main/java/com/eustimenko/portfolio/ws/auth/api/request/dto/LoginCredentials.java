@@ -1,16 +1,16 @@
 package com.eustimenko.portfolio.ws.auth.api.request.dto;
 
+import com.fasterxml.jackson.annotation.*;
+
 import java.io.Serializable;
 
 public class LoginCredentials implements Serializable {
 
-    private String email;
-    private String password;
+    private final String email;
+    private final String password;
 
-    public LoginCredentials() {
-    }
-
-    public LoginCredentials(String email, String password) {
+    @JsonCreator
+    public LoginCredentials(@JsonProperty("email") String email, @JsonProperty("password") String password) {
         this.email = email;
         this.password = password;
     }
@@ -19,15 +19,7 @@ public class LoginCredentials implements Serializable {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getPassword() {
         return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }

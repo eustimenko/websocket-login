@@ -1,6 +1,9 @@
 spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration
+  jackson:
+    serialization:
+      indent_output: true
 #Datasource configuration
   datasource:
     driver-class-name: org.postgresql.Driver

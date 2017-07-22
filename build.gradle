@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:"+springBootVersion
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:" + springBootVersion
     }
 }
 
@@ -35,18 +35,10 @@ repositories {
     maven { url 'http://repo.spring.io/libs-snapshot' }
 }
 
-//TODO: exclude spring configuration classes
-jacocoTestReport {
-    reports {
-        xml.enabled = false
-        csv.enabled = false
-        html.destination = "${buildDir}/jacocoHtml"
-    }
-}
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.boot:spring-boot-starter-parent:"+springBootVersion
+        mavenBom "org.springframework.boot:spring-boot-starter-parent:" + springBootVersion
     }
 }
 
@@ -66,8 +58,20 @@ dependencies {
     compile 'org.hibernate:hibernate-java8'
     compile 'com.zaxxer:HikariCP'
 
-    compile "org.postgresql:postgresql:"+postgresqlVesrion
+    compile "org.postgresql:postgresql:" + postgresqlVesrion
     compile 'org.hsqldb:hsqldb'
 
     testCompile 'org.springframework.boot:spring-boot-starter-test'
+}
+
+jacoco {
+    reportsDir = file("$buildDir/reports")
+}
+
+//TODO: exclude spring configuration classes
+jacocoTestReport {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
 }

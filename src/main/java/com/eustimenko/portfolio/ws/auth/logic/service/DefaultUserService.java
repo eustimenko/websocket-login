@@ -28,8 +28,13 @@ public class DefaultUserService implements UserService {
         this.generator = generator;
     }
 
-    public User getUserByEmail(String email) throws NoSuchElementException {
-        return userRepository.findByEmail(email);
+    public User getUserByEmail(String email) {
+        final User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new NoSuchElementException();
+        } else {
+            return user;
+        }
     }
 
     public Token getActualUserToken(User user) {

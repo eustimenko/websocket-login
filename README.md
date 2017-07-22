@@ -17,6 +17,4 @@ The work on the project consists of the following
 
 ## Build, launch, tests
 
-### Functional tests
-
-launch via command line `gradle test`
+- To test launch via command line `gradle test`
