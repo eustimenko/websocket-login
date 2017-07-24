@@ -1,14 +1,14 @@
 package com.eustimenko.portfolio.ws.auth.api.dto;
 
-import com.eustimenko.portfolio.ws.auth.api.dto.type.LoginCredentials;
+import com.eustimenko.portfolio.ws.auth.api.dto.type.AuthCredentials;
 import com.fasterxml.jackson.annotation.*;
 import org.springframework.util.StringUtils;
 
-public class LoginMessage extends Message<LoginCredentials> {
+public class LoginMessage extends Message<AuthCredentials> {
 
     @JsonCreator
     @JsonPropertyOrder({"type", "sequenceId", "data"})
-    public LoginMessage(@JsonProperty("sequenceId") String sequenceId, @JsonProperty("data") LoginCredentials data) {
+    public LoginMessage(@JsonProperty("sequenceId") String sequenceId, @JsonProperty("data") AuthCredentials data) {
         super(sequenceId, data);
     }
 

@@ -6,7 +6,11 @@ import com.fasterxml.jackson.annotation.*;
 public class SuccessMessage extends Message<Token> {
 
     @JsonCreator
-    public SuccessMessage(@JsonProperty("sequenceId") String sequenceId, @JsonProperty("data") Token data) {
+    protected SuccessMessage(@JsonProperty("sequenceId") String sequenceId, @JsonProperty("data") Token data) {
         super(sequenceId, data);
+    }
+
+    public static SuccessMessage of(String s, Token data) {
+        return new SuccessMessage(s, data);
     }
 }

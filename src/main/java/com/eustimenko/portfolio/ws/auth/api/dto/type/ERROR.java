@@ -6,7 +6,8 @@ public enum ERROR {
     TYPE_IS_INCORRECT("type.incorrect", "Incoming message type is incorrect"),
     DATA_IS_INCORRECT("data.incorrect", "Incoming message data is incorrect"),
     CUSTOMER_NOT_FOUND("customer.notFound", "Customer not found"),
-    PASSWORD_IS_INCORRECT("password.incorrect", "Customer password is incorrect");
+    PASSWORD_IS_INCORRECT("password.incorrect", "Customer password is incorrect"),
+    APPLICATION_ERROR("application.error", "Application error. Urgently contact the application developer: evgenyustimenko@gmail.com");
 
     private final String errorCode;
     private final String errorDescription;

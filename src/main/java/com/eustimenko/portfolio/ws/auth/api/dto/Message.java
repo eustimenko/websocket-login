@@ -40,6 +40,10 @@ public abstract class Message<DATA_TYPE> implements Serializable {
         return StringUtils.isEmpty(sequenceId);
     }
 
+    public String toString() {
+        return sequenceId + ":" + data.getClass();
+    }
+
     public interface Types {
 
         String LOGIN_CUSTOMER = "LOGIN_CUSTOMER";

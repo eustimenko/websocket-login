@@ -9,9 +9,8 @@ spring:
     generate-unique-name: true
   jpa:
       hibernate:
-        dialect: org.hibernate.dialect.HSQLDialect
-        ddl-auto: validate
-      show-sql: true
+        ddl-auto: none
+      show-sql: false
   h2:
     console:
       enabled: false

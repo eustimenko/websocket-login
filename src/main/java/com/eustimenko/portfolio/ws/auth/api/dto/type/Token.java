@@ -1,5 +1,7 @@
 package com.eustimenko.portfolio.ws.auth.api.dto.type;
 
+import com.fasterxml.jackson.annotation.*;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -8,9 +10,10 @@ public class Token implements Serializable {
     private String apiToken;
     private LocalDateTime apiTokenExpirationDate;
 
-    public Token(com.eustimenko.portfolio.ws.auth.persistent.entity.Token entity) {
-        this.apiToken = entity.getToken();
-        this.apiTokenExpirationDate = entity.getExpiredDate();
+    @JsonCreator
+    protected Token(@JsonProperty("token") String apiToken, @JsonProperty("expirationDate") LocalDateTime apiTokenExpirationDate) {
+        this.apiToken = apiToken;
+        this.apiTokenExpirationDate = apiTokenExpirationDate;
     }
 
     public String getApiToken() {
@@ -27,5 +30,9 @@ public class Token implements Serializable {
 
     public void setApiTokenExpirationDate(LocalDateTime apiTokenExpirationDate) {
         this.apiTokenExpirationDate = apiTokenExpirationDate;
+    }
+
+    public static Token of(com.eustimenko.portfolio.ws.auth.persistent.entity.Token t) {
+        return new Token(t.getValue(), t.getExpiredDate());
     }
 }

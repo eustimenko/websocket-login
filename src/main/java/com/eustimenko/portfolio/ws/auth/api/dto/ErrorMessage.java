@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.*;
 public class ErrorMessage extends Message<ERROR> {
 
     @JsonCreator
-    public ErrorMessage(@JsonProperty("sequenceId") String sequenceId, @JsonProperty("data") ERROR data) {
+    protected ErrorMessage(@JsonProperty("sequenceId") String sequenceId, @JsonProperty("data") ERROR data) {
         super(sequenceId, data);
     }
 
@@ -32,5 +32,9 @@ public class ErrorMessage extends Message<ERROR> {
 
     public static ErrorMessage passwordError(String s) {
         return new ErrorMessage(s, ERROR.PASSWORD_IS_INCORRECT);
+    }
+
+    public static Message applicationError(String s) {
+        return new ErrorMessage(s, ERROR.APPLICATION_ERROR);
     }
 }

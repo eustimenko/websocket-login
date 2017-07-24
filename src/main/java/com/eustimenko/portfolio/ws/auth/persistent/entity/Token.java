@@ -11,25 +11,28 @@ public class Token implements Serializable {
     private static final long EXPIRATION_MINUTES = 15;
 
     @Id
-    @Column(name = "token", nullable = false)
-    private String token;
+    @Column(nullable = false)
+    private String value;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
     @Column(name = "expired_date", nullable = false)
     private LocalDateTime expiredDate = LocalDateTime.now().plus(EXPIRATION_MINUTES, ChronoUnit.MINUTES);
 
-    public Token(String token, User user) {
-        this.token = token;
+    public Token() {
+    }
+
+    public Token(String value, User user) {
+        this.value = value;
         this.user = user;
     }
 
-    public String getToken() {
-        return token;
+    public String getValue() {
+        return value;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public User getUser() {
@@ -46,5 +49,9 @@ public class Token implements Serializable {
 
     public void setExpiredDate(LocalDateTime expiredDate) {
         this.expiredDate = expiredDate;
+    }
+
+    public String toString() {
+        return value + ":" + expiredDate;
     }
 }

@@ -2,7 +2,7 @@ package com.eustimenko.portfolio.ws.auth.persistent;
 
 import com.eustimenko.portfolio.ws.auth.persistent.entity.User;
 import com.eustimenko.portfolio.ws.auth.persistent.repository.UserRepository;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.*;
@@ -22,20 +22,26 @@ public class UserRepositoryTest {
     @Autowired
     private UserRepository repository;
 
+    @After
+    public void tearDown() {
+        repository.deleteAllInBatch();
+    }
+
     @Test
     public void getExistingUserByEmail() {
-        final String email = "admin@admin.com";
-        final User user = new User(email, "$2a$10$dTLh8sSdqkQVpoL31tt9renepDKsFNLKwkJdjEbg5uQV2kli0C2qu");
-        em.persist(user);
+        final User expected = prepareUser();
+        final User actual = repository.findByEmail("AdmiN@adMin.com").get();
 
-        final User actual = repository.findByEmail("AdmiN@adMin.com");
         assertNotNull(actual);
-        assertEquals(user.getId(), actual.getId());
+        assertEquals(expected.getId(), actual.getId());
+    }
+
+    private User prepareUser() {
+        return em.persist(new User("admin@admin.com", "$2a$10$dTLh8sSdqkQVpoL31tt9renepDKsFNLKwkJdjEbg5uQV2kli0C2qu"));
     }
 
     @Test
     public void getNonExistingUserByEmail() {
-        em.persist(new User("admin@admin.com", "$2a$10$dTLh8sSdqkQVpoL31tt9renepDKsFNLKwkJdjEbg5uQV2kli0C2qu"));
-        assertNull(repository.findByEmail("user@admin.com"));
+        assertFalse(repository.findByEmail("user@admin.com").isPresent());
     }
 }

@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.*;
 
 import java.io.Serializable;
 
-public class LoginCredentials implements Serializable {
+public class AuthCredentials implements Serializable {
 
     private final String email;
     private final String password;
 
     @JsonCreator
-    public LoginCredentials(@JsonProperty("email") String email, @JsonProperty("password") String password) {
+    protected AuthCredentials(@JsonProperty("email") String email, @JsonProperty("password") String password) {
         this.email = email;
         this.password = password;
     }
@@ -21,5 +21,9 @@ public class LoginCredentials implements Serializable {
 
     public String getPassword() {
         return password;
+    }
+
+    public static AuthCredentials of(String email, String password) {
+        return new AuthCredentials(email, password);
     }
 }

@@ -2,7 +2,7 @@ package com.eustimenko.portfolio.ws.auth.persistent;
 
 import com.eustimenko.portfolio.ws.auth.persistent.entity.*;
 import com.eustimenko.portfolio.ws.auth.persistent.repository.TokenRepository;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.*;
@@ -22,27 +22,32 @@ public class TokenRepositoryTest {
     @Autowired
     private TokenRepository repository;
 
+    @After
+    public void tearDown() {
+        repository.deleteAllInBatch();
+    }
+
     @Test
     public void getTokenByExistingUser() throws Exception {
-        final User user = new User("admin@admin.com", "$2a$10$dTLh8sSdqkQVpoL31tt9renepDKsFNLKwkJdjEbg5uQV2kli0C2qu");
-        em.persist(user);
-        final String token = "$2a$10$dTLh8sSdqkQVpoL31tt9renepDKsFNLKwkJdjEbg5uQV2kli0C2qu";
-        final Token savedToken = em.persist(new Token(token, user));
+        final User user = prepareUser();
+        final Token expected = prepareToken(user);
 
-        final Token actualToken = repository.getTokenByUser(user.getEmail());
-        assertEquals(savedToken, actualToken);
+        final Token actual = repository.getTokenByUser(user.getEmail()).get();
+
+        assertEquals(expected, actual);
+    }
+
+    private User prepareUser() {
+        return em.persist(new User("admin@admin.com", "$2a$10$dTLh8sSdqkQVpoL31tt9renepDKsFNLKwkJdjEbg5uQV2kli0C2qu"));
+    }
+
+    private Token prepareToken(User user) {
+        final String token = "$2a$10$dTLh8sSdqkQVpoL31tt9renepDKsFNLKwkJdjEbg5uQV2kli0C2qu";
+        return em.persist(new Token(token, user));
     }
 
     @Test
     public void getTokenByNonExistingUser() throws Exception {
-        User user = new User("admin@admin.com", "$2a$10$dTLh8sSdqkQVpoL31tt9renepDKsFNLKwkJdjEbg5uQV2kli0C2qu");
-        em.persist(user);
-        final String token = "$2a$10$dTLh8sSdqkQVpoL31tt9renepDKsFNLKwkJdjEbg5uQV2kli0C2qu";
-        final Token savedToken = em.persist(new Token(token, user));
-
-        user = new User("user@admin.com", "$2a$10$dTLh8sSdqkQVpoL31tt9renepDKsFNLKwkJdjEbg5uQV2kli0C2qu");
-
-        final Token actualToken = repository.getTokenByUser(user.getEmail());
-        assertNotEquals(savedToken, actualToken);
+        assertFalse(repository.getTokenByUser("user@admin.com").isPresent());
     }
 }

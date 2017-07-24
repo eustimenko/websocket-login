@@ -14,6 +14,9 @@ public class User implements Serializable {
     private String email;
     private String password;
 
+    public User() {
+    }
+
     public User(String email, String password) {
         this.email = email;
         this.password = password;
@@ -41,5 +44,9 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String toString() {
+        return id + ":" + email;
     }
 }

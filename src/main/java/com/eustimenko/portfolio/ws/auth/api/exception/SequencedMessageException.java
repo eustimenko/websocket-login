@@ -7,4 +7,9 @@ class SequencedMessageException extends RuntimeException {
     SequencedMessageException(String sequenceId) {
         this.sequenceId = sequenceId;
     }
+
+    SequencedMessageException(Throwable cause, String sequenceId) {
+        super(cause);
+        this.sequenceId = sequenceId;
+    }
 }

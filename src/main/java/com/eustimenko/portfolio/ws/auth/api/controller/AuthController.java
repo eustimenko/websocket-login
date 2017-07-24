@@ -10,6 +10,7 @@ import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -17,84 +18,105 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-//TODO: move exception handling into advice
 @Controller
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
-    private final ObjectMapper mapper;
 
     @Autowired
-    public AuthController(UserService userService, PasswordEncoder passwordEncoder) {
+    public AuthController(UserService userService) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
-        this.mapper = new ObjectMapper();
     }
 
     @MessageMapping("/auth/")
     @SendTo("/topic/auth/")
     public Message auth(String s) throws MethodArgumentNotValidException, IllegalArgumentException {
+        final LoginMessage message = getMessage(s);
+        final String sequenceId = getSequence(message);
 
+        if (message.hasNoData()) throw new IncorrectDataException(sequenceId);
+
+        return prepareMessage(message, sequenceId);
+    }
+
+    private LoginMessage getMessage(String s) {
         if (StringUtils.isEmpty(s)) {
             throw new IllegalArgumentException();
         }
 
-        final LoginMessage message;
+        final ObjectMapper mapper = new ObjectMapper();
         try {
-            message = mapper.readValue(s, LoginMessage.class);
+            return mapper.readValue(s, LoginMessage.class);
         } catch (IllegalArgumentException | IOException e) {
             throw new MessageConvertingException(e);
         }
+    }
 
+    private String getSequence(LoginMessage message) {
         if (message.hasNoSequence()) {
             throw new IllegalArgumentException();
         }
 
-        final String sequenceId = message.getSequenceId();
-        if (message.hasNoData()) {
-            throw new IncorrectDataException(sequenceId);
-        }
+        return message.getSequenceId();
+    }
 
+    private Message prepareMessage(LoginMessage message, String sequenceId) {
         try {
-            return processCredentials(message.getData(), sequenceId);
+            final Message sent = processCredentials(message.getData(), sequenceId);
+            logger.info("Sent {}", sent.toString());
+            return sent;
         } catch (NoSuchElementException e) {
             throw new CustomerNotFoundException(sequenceId);
+        } catch (Exception e) {
+            throw new ApplicationError(e, sequenceId);
         }
     }
 
-    private Message processCredentials(LoginCredentials credentials, String s) {
+    private Message processCredentials(AuthCredentials credentials, String s) {
         final User user = userService.getUserByEmail(credentials.getEmail());
+        final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         if (passwordEncoder.matches(credentials.getPassword(), user.getPassword())) {
-            return new SuccessMessage(s, new Token(userService.getActualUserToken(user)));
+            logger.info("User {} is authorized", user.toString());
+            return SuccessMessage.of(s, Token.of(userService.getActualUserToken(user)));
         } else {
             return ErrorMessage.passwordError(s);
         }
     }
 
     @MessageExceptionHandler({MethodArgumentNotValidException.class, IllegalArgumentException.class})
+    @SendTo("/topic/auth/")
     public Message handleMethodArgumentNotValidException(Exception e) {
         logger.debug("handleMethodArgumentNotValidException: ", e);
         return ErrorMessage.nullMessageError();
     }
 
     @MessageExceptionHandler({JsonMappingException.class, MessageConvertingException.class})
+    @SendTo("/topic/auth/")
     public Message handleJsonMappingException(Exception e) {
         logger.debug("handleJsonMappingException: ", e);
         return ErrorMessage.typeError();
     }
 
     @MessageExceptionHandler({IncorrectDataException.class})
+    @SendTo("/topic/auth/")
     public Message handleIncorrectDataException(IncorrectDataException e) {
         logger.debug("handleIncorrectDataException: ", e);
         return ErrorMessage.dataError(e.sequenceId);
     }
 
     @MessageExceptionHandler({CustomerNotFoundException.class})
+    @SendTo("/topic/auth/")
     public Message handleCustomerNotFoundException(CustomerNotFoundException e) {
         logger.debug("handleCustomerNotFoundException: ", e);
         return ErrorMessage.customerNotFoundError(e.sequenceId);
+    }
+
+    @MessageExceptionHandler({ApplicationError.class})
+    @SendTo("/topic/auth/")
+    public Message handleApplicationError(ApplicationError e) {
+        logger.error("APPLICATION ERROR: {}", e);
+        return ErrorMessage.applicationError(e.sequenceId);
     }
 }

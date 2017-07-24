@@ -42,8 +42,9 @@ dependencies {
     compile "org.postgresql:postgresql:" + postgresqlVesrion
 
     testCompile 'org.springframework.boot:spring-boot-starter-test'
-    testRuntime 'org.hsqldb:hsqldb:2.4.0'
+    testRuntime 'org.hsqldb:hsqldb'
 }
+
 jacocoTestReport {
     reports {
         xml.enabled = false

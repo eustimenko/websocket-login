@@ -95,4 +95,29 @@
             <modifyDataType tableName="user" columnName="email" newDataType="VARCHAR(255)"/>
         </rollback>
     </changeSet>
+
+    <changeSet id="7" author="ustimenko" context="QA">
+        <comment>Add test data to hsqldb for tests. Need to delete code refactoring.</comment>
+
+        <sql>
+            INSERT INTO user(id, email, password) VALUES (1, 'test@test.com',
+            '$2a$10$cz369TDGPmX3i4bbb3MXquYbKQw6BLGCAgmVxbPwX49TbGuKerdSa');
+        </sql>
+
+        <rollback>
+            <sql>
+                DELETE FROM user;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="8" author="ustimenko" context="PROD, QA">
+        <comment>Change Token table column from token to value</comment>
+
+        <renameColumn tableName="token" oldColumnName="token" newColumnName="value"/>
+
+        <rollback>
+            <renameColumn tableName="token" oldColumnName="value" newColumnName="token"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

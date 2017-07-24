@@ -15,6 +15,6 @@ public class TokenEncryptorTest {
         final User user = new User("user@test.com", "test");
         final Token token = tokenEncryptor.generateNewToken(user);
 
-        assertTrue(token != null && !StringUtils.isEmpty(token.getToken()));
+        assertTrue(token != null && !StringUtils.isEmpty(token.getValue()));
     }
 }

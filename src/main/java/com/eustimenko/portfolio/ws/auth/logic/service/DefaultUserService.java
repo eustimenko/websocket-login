@@ -9,16 +9,13 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 
 @Service
 @Transactional
 public class DefaultUserService implements UserService {
 
     private final UserRepository userRepository;
-
     private final TokenRepository tokenRepository;
-
     private final TokenEncryptor generator;
 
     @Autowired
@@ -29,18 +26,13 @@ public class DefaultUserService implements UserService {
     }
 
     public User getUserByEmail(String email) {
-        final User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new NoSuchElementException();
-        } else {
-            return user;
-        }
+        return userRepository.findByEmail(email).get();
     }
 
     public Token getActualUserToken(User user) {
-        Token token = tokenRepository.getTokenByUser(user.getEmail());
-        token = token == null ? newToken(user) : expireAndGetNew(token, user);
-        return token;
+        return tokenRepository.getTokenByUser(user.getEmail())
+                .map(t -> expireAndGetNew(t, user))
+                .orElseGet(() -> newToken(user));
     }
 
     private Token newToken(User user) {

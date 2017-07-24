@@ -2,35 +2,30 @@ package com.eustimenko.portfolio.ws.auth.api.controller;
 
 import com.eustimenko.portfolio.ws.auth.api.dto.*;
 import com.eustimenko.portfolio.ws.auth.api.dto.type.*;
-import com.eustimenko.portfolio.ws.auth.logic.service.UserService;
-import com.eustimenko.portfolio.ws.auth.persistent.entity.User;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.*;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.*;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.web.socket.sockjs.client.*;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.*;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AuthControllerTest {
 
+    private static final long TIMEOUT = 1;
     @LocalServerPort
     private int port;
     private String URL;
@@ -42,10 +37,7 @@ public class AuthControllerTest {
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
 
-    private final ObjectMapper mapper = new ObjectMapper();
-
-    @Mock
-    private UserService userService;
+    private AuthControllerTestHelper helper = new AuthControllerTestHelper();
 
     @Before
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
@@ -56,9 +48,9 @@ public class AuthControllerTest {
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
         stompSession = stompClient.connect(URL, new StompSessionHandlerAdapter() {
-        }).get(1, SECONDS);
+        }).get(TIMEOUT, SECONDS);
 
-        stompSession.subscribe(SUBSCRIBE_LOGIN_ENDPOINT, new MessageStompFrameHandler());
+        stompSession.subscribe(SUBSCRIBE_LOGIN_ENDPOINT, new MessageStompFrameHandler(completableFuture));
     }
 
     private List<Transport> createTransportClient() {
@@ -76,104 +68,99 @@ public class AuthControllerTest {
     }
 
     @Test
+    public void sendAny() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        stompSession.send(SEND_LOGIN_ENDPOINT, null);
+
+        Message result = getResult();
+        assertNotNull(result);
+    }
+
+    @Test
     public void sendNull() throws InterruptedException, ExecutionException, TimeoutException, IOException {
         stompSession.send(SEND_LOGIN_ENDPOINT, null);
 
-        Message result = completableFuture.get(1, SECONDS);
-        assertNotNull(result);
+        final Message<ERROR> result = helper.getMessageAsError(getResult());
 
-        result = mapper.convertValue(result, ErrorMessage.class);
-        assertEquals(result.getData(), ERROR.MESSAGE_IS_NULL);
+        assertEquals(ERROR.MESSAGE_IS_NULL, result.getData());
+    }
+
+    private Message getResult() throws InterruptedException, ExecutionException, TimeoutException {
+        return completableFuture.get(TIMEOUT, SECONDS);
     }
 
     @Test
     public void sendEmpty() throws InterruptedException, ExecutionException, TimeoutException, IOException {
         stompSession.send(SEND_LOGIN_ENDPOINT, "");
 
-        Message result = completableFuture.get(1, SECONDS);
-        assertNotNull(result);
+        final Message<ERROR> result = helper.getMessageAsError(getResult());
 
-        result = mapper.convertValue(result, ErrorMessage.class);
-        assertEquals(result.getData(), ERROR.MESSAGE_IS_NULL);
+        assertEquals(ERROR.MESSAGE_IS_NULL, result.getData());
     }
 
     @Test
     public void sendIncorrectTypeOfMessage() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, mapper.writeValueAsString(ErrorMessage.nullMessageError()));
+        stompSession.send(SEND_LOGIN_ENDPOINT, helper.invalidType());
 
-        Message result = completableFuture.get(1, SECONDS);
-        assertNotNull(result);
+        final Message<ERROR> result = helper.getMessageAsError(getResult());
 
-        result = mapper.convertValue(result, ErrorMessage.class);
-        assertEquals(result.getData(), ERROR.TYPE_IS_INCORRECT);
+        assertEquals(ERROR.TYPE_IS_INCORRECT, result.getData());
     }
 
     @Test
     public void sendIncorrectTypeOfArgument() throws InterruptedException, ExecutionException, TimeoutException, IOException {
         stompSession.send(SEND_LOGIN_ENDPOINT, ErrorMessage.nullMessageError());
 
-        Message result = completableFuture.get(1, SECONDS);
-        assertNotNull(result);
+        final Message<ERROR> result = helper.getMessageAsError(getResult());
 
-        result = mapper.convertValue(result, ErrorMessage.class);
-        assertEquals(result.getData(), ERROR.TYPE_IS_INCORRECT);
+        assertEquals(ERROR.TYPE_IS_INCORRECT, result.getData());
     }
 
     @Test
     public void sendNoSequence() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, mapper.writeValueAsString(new LoginMessage("", new LoginCredentials("", ""))));
+        stompSession.send(SEND_LOGIN_ENDPOINT, helper.empty());
 
-        Message result = completableFuture.get(1, SECONDS);
-        assertNotNull(result);
+        final Message<ERROR> result = helper.getMessageAsError(getResult());
 
-        result = mapper.convertValue(result, ErrorMessage.class);
-        assertEquals(result.getData(), ERROR.MESSAGE_IS_NULL);
+        assertEquals(ERROR.MESSAGE_IS_NULL, result.getData());
     }
 
     @Test
     public void sendNoData() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, mapper.writeValueAsString(new LoginMessage("customSequence", new LoginCredentials("", ""))));
+        stompSession.send(SEND_LOGIN_ENDPOINT, helper.invalidBody());
 
-        Message result = completableFuture.get(1, SECONDS);
-        assertNotNull(result);
+        final Message<ERROR> result = helper.getMessageAsError(getResult());
 
-        result = mapper.convertValue(result, ErrorMessage.class);
-        assertEquals(result.getData(), ERROR.DATA_IS_INCORRECT);
+        assertEquals(ERROR.DATA_IS_INCORRECT, result.getData());
     }
 
     @Test
     public void sendNonExistingEmail() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, mapper.writeValueAsString(new LoginMessage("customSequence", new LoginCredentials("nonExistingEmail", "mandatoryPassword"))));
+        stompSession.send(SEND_LOGIN_ENDPOINT, helper.nonExistingEmail());
 
-        Message result = completableFuture.get(1, SECONDS);
-        assertNotNull(result);
+        final Message<ERROR> result = helper.getMessageAsError(getResult());
 
-        result = mapper.convertValue(result, ErrorMessage.class);
-        assertEquals(result.getData(), ERROR.CUSTOMER_NOT_FOUND);
+        assertEquals(ERROR.CUSTOMER_NOT_FOUND, result.getData());
+    }
+
+    @Test
+    public void sendExistingEmailWithIncorrectPassword() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        stompSession.send(SEND_LOGIN_ENDPOINT, helper.invalidPassword());
+
+        final Message<ERROR> result = helper.getMessageAsError(getResult());
+
+        assertEquals(ERROR.PASSWORD_IS_INCORRECT, result.getData());
     }
 
     @Test
     @Transactional
-    @Ignore("Correct mocking of `getUserByEmail()`")
-    public void sendExistingEmailWithIncorrectPassword() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        given(userService.getUserByEmail("existing@gmail.com")).willReturn(new User("existing@gmail.com", "mandatoryPassword"));
+    @Ignore("TimeoutException")
+    public void sendExistingEmailWithCorrectPassword() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        stompSession.send(SEND_LOGIN_ENDPOINT, helper.valid());
 
-        stompSession.send(SEND_LOGIN_ENDPOINT, mapper.writeValueAsString(new LoginMessage("existing@mail.com", new LoginCredentials("existing@mail.com", "nonMandatoryPassword"))));
+        final Message<Token> result = helper.getMessageAsSuccess(getResult());
+        final Token token = result.getData();
 
-        Message result = completableFuture.get(1, SECONDS);
-        assertNotNull(result);
-
-        result = mapper.convertValue(result, ErrorMessage.class);
-        assertEquals(result.getData(), ERROR.PASSWORD_IS_INCORRECT);
-    }
-
-    private class MessageStompFrameHandler implements StompFrameHandler {
-        public Type getPayloadType(StompHeaders stompHeaders) {
-            return Message.class;
-        }
-
-        public void handleFrame(StompHeaders stompHeaders, Object o) {
-            completableFuture.complete((Message) o);
-        }
+        assertNotNull(token);
+        assertNotEquals("", token.getApiToken());
     }
 }
