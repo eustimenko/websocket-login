@@ -1,11 +1,3 @@
-## Modules structure
-
-`persistent` - Data Access Layer: contains models and repositories.
-
-`logic` - Business Logic Layer: contains services.
-
-`api` - Web API Layer: contains web controllers.
-
 ## Dependencies
 
 The work on the project consists of the following
@@ -18,3 +10,11 @@ The work on the project consists of the following
 ## Build, launch, tests
 
 - To test launch via command line `gradle test`
+
+##TODO
+- fix integration tests
+- wide tests
+- create separate session for separate logged in user
+- add hypermedia 
+- connect messages via sequence_id vice versa
+- configure web sockets via `.yaml`
