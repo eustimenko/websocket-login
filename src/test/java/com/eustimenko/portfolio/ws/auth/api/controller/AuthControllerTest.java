@@ -1,7 +1,7 @@
 package com.eustimenko.portfolio.ws.auth.api.controller;
 
-import com.eustimenko.portfolio.ws.auth.api.dto.*;
-import com.eustimenko.portfolio.ws.auth.api.dto.type.*;
+import com.eustimenko.portfolio.ws.auth.logic.dto.*;
+import com.eustimenko.portfolio.ws.auth.logic.dto.type.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.boot.context.embedded.LocalServerPort;
@@ -9,11 +9,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.*;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.web.socket.sockjs.client.*;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -30,10 +30,10 @@ public class AuthControllerTest {
     private int port;
     private String URL;
 
-    private static final String SEND_LOGIN_ENDPOINT = "/app/auth/";
-    private static final String SUBSCRIBE_LOGIN_ENDPOINT = "/topic/auth/";
+    private static final String SEND_LOGIN_ENDPOINT = "/app/auth";
+    private static final String SUBSCRIBE_LOGIN_ENDPOINT = "/topic/customer";
 
-    private CompletableFuture<Message> completableFuture;
+    private CompletableFuture<String> completableFuture;
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
 
@@ -69,9 +69,9 @@ public class AuthControllerTest {
 
     @Test
     public void sendAny() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, null);
+        stompSession.send(SEND_LOGIN_ENDPOINT, "hello");
 
-        Message result = getResult();
+        String result = getResult();
         assertNotNull(result);
     }
 
@@ -84,7 +84,7 @@ public class AuthControllerTest {
         assertEquals(ERROR.MESSAGE_IS_NULL, result.getData());
     }
 
-    private Message getResult() throws InterruptedException, ExecutionException, TimeoutException {
+    private String getResult() throws InterruptedException, ExecutionException, TimeoutException {
         return completableFuture.get(TIMEOUT, SECONDS);
     }
 
@@ -103,7 +103,7 @@ public class AuthControllerTest {
 
         final Message<ERROR> result = helper.getMessageAsError(getResult());
 
-        assertEquals(ERROR.TYPE_IS_INCORRECT, result.getData());
+        assertEquals(ERROR.FORMAT_IS_INCORRECT, result.getData());
     }
 
     @Test
@@ -112,7 +112,7 @@ public class AuthControllerTest {
 
         final Message<ERROR> result = helper.getMessageAsError(getResult());
 
-        assertEquals(ERROR.TYPE_IS_INCORRECT, result.getData());
+        assertEquals(ERROR.FORMAT_IS_INCORRECT, result.getData());
     }
 
     @Test
@@ -148,12 +148,12 @@ public class AuthControllerTest {
 
         final Message<ERROR> result = helper.getMessageAsError(getResult());
 
-        assertEquals(ERROR.PASSWORD_IS_INCORRECT, result.getData());
+        assertEquals(ERROR.CUSTOMER_NOT_FOUND, result.getData());
     }
 
     @Test
     @Transactional
-    @Ignore("TimeoutException")
+    @Ignore
     public void sendExistingEmailWithCorrectPassword() throws InterruptedException, ExecutionException, TimeoutException, IOException {
         stompSession.send(SEND_LOGIN_ENDPOINT, helper.valid());
 

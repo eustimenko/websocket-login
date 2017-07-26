@@ -1,15 +1,18 @@
-package com.eustimenko.portfolio.ws.auth.api.dto.type;
+package com.eustimenko.portfolio.ws.auth.logic.dto.type;
 
+import com.fasterxml.jackson.annotation.*;
+
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum ERROR {
 
     MESSAGE_IS_NULL("message.null", "Incoming message is null or has no sequence id"),
-    TYPE_IS_INCORRECT("type.incorrect", "Incoming message type is incorrect"),
+    FORMAT_IS_INCORRECT("format.incorrect", "Incoming message format is incorrect"),
     DATA_IS_INCORRECT("data.incorrect", "Incoming message data is incorrect"),
-    CUSTOMER_NOT_FOUND("customer.notFound", "Customer not found"),
-    PASSWORD_IS_INCORRECT("password.incorrect", "Customer password is incorrect"),
-    APPLICATION_ERROR("application.error", "Application error. Urgently contact the application developer: evgenyustimenko@gmail.com");
+    CUSTOMER_NOT_FOUND("customer.notFound", "Email or password is incorrect");
 
+    @JsonProperty("error_code")
     private final String errorCode;
+    @JsonProperty("error_description")
     private final String errorDescription;
 
     ERROR(String errorCode, String errorDescription) {

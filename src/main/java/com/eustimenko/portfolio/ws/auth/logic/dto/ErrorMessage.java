@@ -1,12 +1,12 @@
-package com.eustimenko.portfolio.ws.auth.api.dto;
+package com.eustimenko.portfolio.ws.auth.logic.dto;
 
-import com.eustimenko.portfolio.ws.auth.api.dto.type.ERROR;
+import com.eustimenko.portfolio.ws.auth.logic.dto.type.ERROR;
 import com.fasterxml.jackson.annotation.*;
 
 public class ErrorMessage extends Message<ERROR> {
 
     @JsonCreator
-    protected ErrorMessage(@JsonProperty("sequenceId") String sequenceId, @JsonProperty("data") ERROR data) {
+    protected ErrorMessage(@JsonProperty("sequence_id") String sequenceId, @JsonProperty("data") ERROR data) {
         super(sequenceId, data);
     }
 
@@ -15,7 +15,7 @@ public class ErrorMessage extends Message<ERROR> {
     }
 
     public static ErrorMessage typeError() {
-        return new ErrorMessage(ERROR.TYPE_IS_INCORRECT);
+        return new ErrorMessage(ERROR.FORMAT_IS_INCORRECT);
     }
 
     public static ErrorMessage nullMessageError() {
@@ -30,11 +30,7 @@ public class ErrorMessage extends Message<ERROR> {
         return new ErrorMessage(s, ERROR.CUSTOMER_NOT_FOUND);
     }
 
-    public static ErrorMessage passwordError(String s) {
-        return new ErrorMessage(s, ERROR.PASSWORD_IS_INCORRECT);
-    }
-
-    public static Message applicationError(String s) {
-        return new ErrorMessage(s, ERROR.APPLICATION_ERROR);
+    public String toString() {
+        return sequenceId + ":" + data;
     }
 }

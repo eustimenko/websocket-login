@@ -1,4 +1,4 @@
-package com.eustimenko.portfolio.ws.auth.api.dto;
+package com.eustimenko.portfolio.ws.auth.logic.dto;
 
 import com.fasterxml.jackson.annotation.*;
 import org.springframework.util.StringUtils;
@@ -18,11 +18,12 @@ import java.io.Serializable;
 })
 public abstract class Message<DATA_TYPE> implements Serializable {
 
-    private final String sequenceId;
+    @JsonProperty("sequence_id")
+    final String sequenceId;
     final DATA_TYPE data;
 
     @JsonCreator
-    Message(@JsonProperty("sequenceId") String sequenceId, @JsonProperty("data") DATA_TYPE data) {
+    Message(@JsonProperty("sequence_id") String sequenceId, @JsonProperty("data") DATA_TYPE data) {
         this.sequenceId = sequenceId;
         this.data = data;
     }

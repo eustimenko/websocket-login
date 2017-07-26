@@ -19,7 +19,7 @@ public class Token implements Serializable {
     @Column(name = "expired_date", nullable = false)
     private LocalDateTime expiredDate = LocalDateTime.now().plus(EXPIRATION_MINUTES, ChronoUnit.MINUTES);
 
-    public Token() {
+    Token() {
     }
 
     public Token(String value, User user) {

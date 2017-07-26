@@ -1,4 +1,4 @@
-package com.eustimenko.portfolio.ws.auth.api.dto.type;
+package com.eustimenko.portfolio.ws.auth.logic.dto.type;
 
 import com.fasterxml.jackson.annotation.*;
 
@@ -34,5 +34,9 @@ public class Token implements Serializable {
 
     public static Token of(com.eustimenko.portfolio.ws.auth.persistent.entity.Token t) {
         return new Token(t.getValue(), t.getExpiredDate());
+    }
+
+    public String toString() {
+        return apiToken + ":" + apiTokenExpirationDate;
     }
 }

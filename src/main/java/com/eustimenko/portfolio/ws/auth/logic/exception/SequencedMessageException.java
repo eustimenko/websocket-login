@@ -1,4 +1,4 @@
-package com.eustimenko.portfolio.ws.auth.api.exception;
+package com.eustimenko.portfolio.ws.auth.logic.exception;
 
 class SequencedMessageException extends RuntimeException {
 

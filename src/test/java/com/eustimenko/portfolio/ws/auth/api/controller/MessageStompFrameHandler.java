@@ -1,6 +1,5 @@
 package com.eustimenko.portfolio.ws.auth.api.controller;
 
-import com.eustimenko.portfolio.ws.auth.api.dto.Message;
 import org.springframework.messaging.simp.stomp.*;
 
 import java.lang.reflect.Type;
@@ -8,17 +7,17 @@ import java.util.concurrent.CompletableFuture;
 
 public class MessageStompFrameHandler implements StompFrameHandler {
 
-    private final CompletableFuture<Message> completableFuture;
+    private final CompletableFuture<String> completableFuture;
 
-    public MessageStompFrameHandler(CompletableFuture<Message> completableFuture) {
+    MessageStompFrameHandler(CompletableFuture<String> completableFuture) {
         this.completableFuture = completableFuture;
     }
 
     public Type getPayloadType(StompHeaders stompHeaders) {
-        return Message.class;
+        return String.class;
     }
 
     public void handleFrame(StompHeaders stompHeaders, Object o) {
-        completableFuture.complete((Message) o);
+        completableFuture.complete((String) o);
     }
 }

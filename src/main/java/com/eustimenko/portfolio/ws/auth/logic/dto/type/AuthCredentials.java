@@ -1,4 +1,4 @@
-package com.eustimenko.portfolio.ws.auth.api.dto.type;
+package com.eustimenko.portfolio.ws.auth.logic.dto.type;
 
 import com.fasterxml.jackson.annotation.*;
 

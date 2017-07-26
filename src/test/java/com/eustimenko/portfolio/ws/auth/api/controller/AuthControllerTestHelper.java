@@ -1,7 +1,7 @@
 package com.eustimenko.portfolio.ws.auth.api.controller;
 
-import com.eustimenko.portfolio.ws.auth.api.dto.*;
-import com.eustimenko.portfolio.ws.auth.api.dto.type.AuthCredentials;
+import com.eustimenko.portfolio.ws.auth.logic.dto.*;
+import com.eustimenko.portfolio.ws.auth.logic.dto.type.AuthCredentials;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,11 +37,11 @@ class AuthControllerTestHelper {
                         AuthCredentials.of("test@test.com", "password")));
     }
 
-    ErrorMessage getMessageAsError(Message m) {
+    ErrorMessage getMessageAsError(String m) {
         return mapper.convertValue(m, ErrorMessage.class);
     }
 
-    SuccessMessage getMessageAsSuccess(Message m) {
+    SuccessMessage getMessageAsSuccess(String m) {
         return mapper.convertValue(m, SuccessMessage.class);
     }
 }
