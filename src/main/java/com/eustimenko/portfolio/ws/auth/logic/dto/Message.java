@@ -37,7 +37,7 @@ public abstract class Message<DATA_TYPE> implements Serializable {
     }
 
     @JsonIgnore
-    public boolean hasNoSequence() {
+    boolean hasNoSequence() {
         return StringUtils.isEmpty(sequenceId);
     }
 

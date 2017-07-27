@@ -19,6 +19,7 @@ gradlew.bat
 /gradle
 /.gradle
 /build
+/out
 */gradle
 */.gradle
 */build

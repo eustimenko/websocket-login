@@ -15,8 +15,8 @@ public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-    private static final String SOURCE = "/auth";
-    private static final String DESTINATION = "/topic/customer";
+    static final String SOURCE = "/auth";
+    static final String DESTINATION = "/topic/customer";
 
     private final MessageService messageService;
 
@@ -36,29 +36,31 @@ public class AuthController {
 
     @MessageExceptionHandler({MethodArgumentNotValidException.class, IllegalArgumentException.class})
     @SendTo(DESTINATION)
-    public Message handleMethodArgumentNotValidException(Exception e) {
-        logger.debug("handleMethodArgumentNotValidException: ", e);
-        return ErrorMessage.nullMessageError();
+    public ErrorMessage handleMethodArgumentNotValidException(Exception e) {
+        return handleException(e, ErrorMessage.nullMessageError());
     }
 
     @MessageExceptionHandler({JsonMappingException.class, MessageConvertingException.class})
     @SendTo(DESTINATION)
-    public Message handleJsonMappingException(Exception e) {
-        logger.debug("handleJsonMappingException: ", e);
-        return ErrorMessage.typeError();
+    public ErrorMessage handleJsonMappingException(Exception e) {
+        return handleException(e, ErrorMessage.typeError());
     }
 
     @MessageExceptionHandler({IncorrectDataException.class})
     @SendTo(DESTINATION)
-    public Message handleIncorrectDataException(IncorrectDataException e) {
-        logger.debug("handleIncorrectDataException: ", e);
-        return ErrorMessage.dataError(e.sequenceId);
+    public ErrorMessage handleIncorrectDataException(IncorrectDataException e) {
+        return handleException(e, ErrorMessage.dataError(e.sequenceId));
     }
 
     @MessageExceptionHandler({CustomerNotFoundException.class})
     @SendTo(DESTINATION)
-    public Message handleCustomerNotFoundException(CustomerNotFoundException e) {
-        logger.debug("handleCustomerNotFoundException: ", e);
-        return ErrorMessage.customerNotFoundError(e.sequenceId);
+    public ErrorMessage handleCustomerNotFoundException(CustomerNotFoundException e) {
+        return handleException(e, ErrorMessage.customerNotFoundError(e.sequenceId));
+    }
+
+    private ErrorMessage handleException(Exception e, ErrorMessage em) {
+        logger.debug("{}", e);
+        logger.info("Sent: {}", em);
+        return em;
     }
 }

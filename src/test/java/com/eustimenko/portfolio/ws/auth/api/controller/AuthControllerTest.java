@@ -2,8 +2,10 @@ package com.eustimenko.portfolio.ws.auth.api.controller;
 
 import com.eustimenko.portfolio.ws.auth.logic.dto.*;
 import com.eustimenko.portfolio.ws.auth.logic.dto.type.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.*;
 import org.junit.runner.RunWith;
+import org.slf4j.*;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -14,7 +16,7 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.web.socket.sockjs.client.*;
 
-import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -25,32 +27,45 @@ import static org.junit.Assert.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AuthControllerTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthControllerTest.class);
+
     private static final long TIMEOUT = 1;
     @LocalServerPort
     private int port;
-    private String URL;
 
-    private static final String SEND_LOGIN_ENDPOINT = "/app/auth";
-    private static final String SUBSCRIBE_LOGIN_ENDPOINT = "/topic/customer";
-
-    private CompletableFuture<String> completableFuture;
+    private CompletableFuture<Message> result;
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
 
     private AuthControllerTestHelper helper = new AuthControllerTestHelper();
 
     @Before
-    public void setup() throws InterruptedException, ExecutionException, TimeoutException {
-        completableFuture = new CompletableFuture<>();
-        URL = "ws://localhost:" + port + "/login";
+    public void setup() {
+        result = new CompletableFuture<>();
+        final String URL = "ws://localhost:" + port + "/login";
 
         stompClient = new WebSocketStompClient(new SockJsClient(createTransportClient()));
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
-        stompSession = stompClient.connect(URL, new StompSessionHandlerAdapter() {
-        }).get(TIMEOUT, SECONDS);
+        try {
+            stompSession = stompClient.connect(URL, new StompSessionHandlerAdapter() {
+            }).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
 
-        stompSession.subscribe(SUBSCRIBE_LOGIN_ENDPOINT, new MessageStompFrameHandler(completableFuture));
+        stompSession.subscribe(AuthController.DESTINATION, new StompFrameHandler() {
+
+            public Type getPayloadType(StompHeaders headers) {
+                logger.info("Handle getPayloadType()");
+                return Message.class;
+            }
+
+            public void handleFrame(StompHeaders headers, Object payload) {
+                logger.info("Handle handleFrame(): {}", payload);
+                result.complete((Message) payload);
+            }
+        });
     }
 
     private List<Transport> createTransportClient() {
@@ -61,101 +76,96 @@ public class AuthControllerTest {
 
     @After
     public void tearDown() {
-        stompSession.disconnect();
-        if (stompClient.isRunning()) {
-            stompClient.stop();
+        if (stompSession.isConnected()) stompSession.disconnect();
+        if (stompClient.isRunning()) stompClient.stop();
+    }
+
+    @Test
+    public void sendAny() {
+        sendToSocket("hello");
+
+        Message result = getResult();
+        assertNotNull(result);
+    }
+
+    private void sendToSocket(Object o) {
+        stompSession.send(AuthController.SOURCE, o);
+    }
+
+    private Message getResult() {
+        try {
+            return result.get(TIMEOUT, SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
     @Test
-    public void sendAny() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, "hello");
+    public void sendNull() {
+        sendToSocket(null);
 
-        String result = getResult();
-        assertNotNull(result);
+        assertEquals(ERROR.MESSAGE_IS_NULL, getErrorData());
+    }
+
+    private ERROR getErrorData() {
+        return helper.getMessageAsError(getResult()).getData();
     }
 
     @Test
-    public void sendNull() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, null);
+    public void sendEmpty() {
+        sendToSocket("");
 
-        final Message<ERROR> result = helper.getMessageAsError(getResult());
-
-        assertEquals(ERROR.MESSAGE_IS_NULL, result.getData());
-    }
-
-    private String getResult() throws InterruptedException, ExecutionException, TimeoutException {
-        return completableFuture.get(TIMEOUT, SECONDS);
+        assertEquals(ERROR.MESSAGE_IS_NULL, getErrorData());
     }
 
     @Test
-    public void sendEmpty() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, "");
+    public void sendIncorrectTypeOfMessage() throws JsonProcessingException {
+        sendToSocket(helper.invalidType());
 
-        final Message<ERROR> result = helper.getMessageAsError(getResult());
-
-        assertEquals(ERROR.MESSAGE_IS_NULL, result.getData());
+        assertEquals(ERROR.FORMAT_IS_INCORRECT, getErrorData());
     }
 
     @Test
-    public void sendIncorrectTypeOfMessage() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, helper.invalidType());
+    public void sendIncorrectTypeOfArgument() {
+        sendToSocket(ErrorMessage.nullMessageError());
 
-        final Message<ERROR> result = helper.getMessageAsError(getResult());
-
-        assertEquals(ERROR.FORMAT_IS_INCORRECT, result.getData());
+        assertEquals(ERROR.FORMAT_IS_INCORRECT, getErrorData());
     }
 
     @Test
-    public void sendIncorrectTypeOfArgument() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, ErrorMessage.nullMessageError());
+    public void sendNoSequence() throws JsonProcessingException {
+        sendToSocket(helper.empty());
 
-        final Message<ERROR> result = helper.getMessageAsError(getResult());
-
-        assertEquals(ERROR.FORMAT_IS_INCORRECT, result.getData());
+        assertEquals(ERROR.MESSAGE_IS_NULL, getErrorData());
     }
 
     @Test
-    public void sendNoSequence() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, helper.empty());
+    public void sendNoData() throws JsonProcessingException {
+        sendToSocket(helper.invalidBody());
 
-        final Message<ERROR> result = helper.getMessageAsError(getResult());
-
-        assertEquals(ERROR.MESSAGE_IS_NULL, result.getData());
+        assertEquals(ERROR.DATA_IS_INCORRECT, getErrorData());
     }
 
     @Test
-    public void sendNoData() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, helper.invalidBody());
+    public void sendNonExistingEmail() throws JsonProcessingException {
+        sendToSocket(helper.nonExistingEmail());
 
-        final Message<ERROR> result = helper.getMessageAsError(getResult());
-
-        assertEquals(ERROR.DATA_IS_INCORRECT, result.getData());
+        assertEquals(ERROR.CUSTOMER_NOT_FOUND, getErrorData());
     }
 
     @Test
-    public void sendNonExistingEmail() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, helper.nonExistingEmail());
+    public void sendExistingEmailWithIncorrectPassword() throws JsonProcessingException {
+        sendToSocket(helper.invalidPassword());
 
-        final Message<ERROR> result = helper.getMessageAsError(getResult());
-
-        assertEquals(ERROR.CUSTOMER_NOT_FOUND, result.getData());
-    }
-
-    @Test
-    public void sendExistingEmailWithIncorrectPassword() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, helper.invalidPassword());
-
-        final Message<ERROR> result = helper.getMessageAsError(getResult());
-
-        assertEquals(ERROR.CUSTOMER_NOT_FOUND, result.getData());
+        assertEquals(ERROR.CUSTOMER_NOT_FOUND, getErrorData());
     }
 
     @Test
     @Transactional
     @Ignore
-    public void sendExistingEmailWithCorrectPassword() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        stompSession.send(SEND_LOGIN_ENDPOINT, helper.valid());
+    public void sendExistingEmailWithCorrectPassword() throws JsonProcessingException {
+        sendToSocket(helper.valid());
 
         final Message<Token> result = helper.getMessageAsSuccess(getResult());
         final Token token = result.getData();

@@ -37,11 +37,11 @@ class AuthControllerTestHelper {
                         AuthCredentials.of("test@test.com", "password")));
     }
 
-    ErrorMessage getMessageAsError(String m) {
+    ErrorMessage getMessageAsError(Message m) {
         return mapper.convertValue(m, ErrorMessage.class);
     }
 
-    SuccessMessage getMessageAsSuccess(String m) {
+    SuccessMessage getMessageAsSuccess(Message m) {
         return mapper.convertValue(m, SuccessMessage.class);
     }
 }
