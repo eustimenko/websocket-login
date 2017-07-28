@@ -14,6 +14,5 @@ The work on the project consists of the following
 - fix integration tests
 - wide tests
 - create separate session for separate logged in user
-- add hypermedia 
 - connect messages via sequence_id vice versa
 - configure web sockets via `.yaml`

@@ -4,6 +4,7 @@ spring:
   jackson:
     serialization:
       indent_output: true
+    date-format: com.fasterxml.jackson.databind.util.StdDateFormat
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://127.0.0.1:5432/wslogin
@@ -19,6 +20,8 @@ spring:
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
         physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
     show-sql: false
+  session:
+    store-type: hash_map
 
 liquibase:
   change-log: classpath:/liquibase/db.changelog-master.xml

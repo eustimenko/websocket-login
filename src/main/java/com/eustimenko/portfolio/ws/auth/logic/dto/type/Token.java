@@ -7,11 +7,13 @@ import java.time.LocalDateTime;
 
 public class Token implements Serializable {
 
+    @JsonProperty("api_token")
     private String apiToken;
+    @JsonProperty("api_token_expiration_date")
     private LocalDateTime apiTokenExpirationDate;
 
     @JsonCreator
-    protected Token(@JsonProperty("token") String apiToken, @JsonProperty("expirationDate") LocalDateTime apiTokenExpirationDate) {
+    protected Token(String apiToken, LocalDateTime apiTokenExpirationDate) {
         this.apiToken = apiToken;
         this.apiTokenExpirationDate = apiTokenExpirationDate;
     }

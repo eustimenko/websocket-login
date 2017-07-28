@@ -5,6 +5,7 @@ import java.io.Serializable;
 
 @Entity
 @Cacheable
+@Table(name = "users")
 public class User implements Serializable {
 
     @Id

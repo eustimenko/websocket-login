@@ -1,5 +1,5 @@
 plugins {
-    id "org.springframework.boot" version "1.5.4.RELEASE" apply true
+    id "org.springframework.boot" version "1.5.6.RELEASE" apply true
     id "io.spring.dependency-management" version "0.6.1.RELEASE" apply true
 }
 
@@ -31,19 +31,29 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-security'
     compile 'org.springframework.boot:spring-boot-starter-websocket'
     compile 'org.springframework:spring-messaging'
+    compile 'org.springframework.session:spring-session'
 
     compile 'com.fasterxml.jackson.core:jackson-annotations'
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
+    compile "org.postgresql:postgresql:" + postgresqlVesrion
     compile 'org.hibernate:hibernate-entitymanager'
     compile 'org.hibernate:hibernate-ehcache'
     compile 'org.hibernate:hibernate-java8'
     compile 'com.zaxxer:HikariCP'
     runtime 'org.liquibase:liquibase-core'
 
-    compile "org.postgresql:postgresql:" + postgresqlVesrion
 
     testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'org.eclipse.jetty:jetty-client:9.4.6.v20170531'
     testRuntime 'org.hsqldb:hsqldb'
+
+    //Client libs
+    compile("org.webjars:webjars-locator")
+    compile("org.webjars:sockjs-client:1.0.2")
+    compile("org.webjars:stomp-websocket:2.3.3")
+    compile("org.webjars:bootstrap:3.3.7")
+    compile("org.webjars:jquery:3.1.0")
 }
 
 jacocoTestReport {

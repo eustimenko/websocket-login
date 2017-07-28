@@ -14,6 +14,8 @@ spring:
   h2:
     console:
       enabled: false
+  session:
+      store-type: hash_map
 
 liquibase:
   change-log: classpath:/liquibase/db.changelog-master.xml

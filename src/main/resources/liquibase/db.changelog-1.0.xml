@@ -120,4 +120,14 @@
             <renameColumn tableName="token" oldColumnName="value" newColumnName="token"/>
         </rollback>
     </changeSet>
+
+    <changeSet id="9" author="ustimenko" context="PROD, QA">
+        <comment>Rename 'user' table to 'users'</comment>
+
+        <renameTable oldTableName="user" newTableName="users"/>
+
+        <rollback>
+            <renameTable oldTableName="users" newTableName="user"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

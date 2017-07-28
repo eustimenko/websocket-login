@@ -3,9 +3,10 @@ package com.eustimenko.portfolio.ws.auth.api.controller;
 import com.eustimenko.portfolio.ws.auth.logic.dto.*;
 import com.eustimenko.portfolio.ws.auth.logic.dto.type.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.junit.*;
 import org.junit.runner.RunWith;
-import org.slf4j.*;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -27,57 +28,57 @@ import static org.junit.Assert.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AuthControllerTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthControllerTest.class);
+    private static final long TIMEOUT = 1L;
+    private static final String AUTH_END_POINT = "/app/auth";
+    private static final String SUBSCRIBED_END_POINT = "/queue/reply";
 
-    private static final long TIMEOUT = 1;
-    @LocalServerPort
-    private int port;
-
-    private CompletableFuture<Message> result;
-    private WebSocketStompClient stompClient;
+    private CompletableFuture<Message> result = new CompletableFuture<>();
     private StompSession stompSession;
 
     private AuthControllerTestHelper helper = new AuthControllerTestHelper();
 
-    @Before
-    public void setup() {
-        result = new CompletableFuture<>();
-        final String URL = "ws://localhost:" + port + "/login";
+    @LocalServerPort
+    private int port;
 
-        stompClient = new WebSocketStompClient(new SockJsClient(createTransportClient()));
+    @Before
+    public void setup() throws InterruptedException, ExecutionException, TimeoutException {
+        final WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(transports()));
+
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
-        try {
-            stompSession = stompClient.connect(URL, new StompSessionHandlerAdapter() {
-            }).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        stompSession = stompClient
+                .connect("ws://localhost:" + port + "/login", new StompSessionHandlerAdapter() {
+                })
+                .get(TIMEOUT, SECONDS);
 
-        stompSession.subscribe(AuthController.DESTINATION, new StompFrameHandler() {
-
-            public Type getPayloadType(StompHeaders headers) {
-                logger.info("Handle getPayloadType()");
-                return Message.class;
-            }
-
-            public void handleFrame(StompHeaders headers, Object payload) {
-                logger.info("Handle handleFrame(): {}", payload);
-                result.complete((Message) payload);
-            }
-        });
+        stompSession.subscribe(SUBSCRIBED_END_POINT, new DefaultStompFrameHandler());
     }
 
-    private List<Transport> createTransportClient() {
-        final List<Transport> transports = new ArrayList<>(1);
+    private List<Transport> transports() {
+        final List<Transport> transports = new ArrayList<>(3);
         transports.add(new WebSocketTransport(new StandardWebSocketClient()));
+        transports.add(new RestTemplateXhrTransport());
+        transports.add(toSimulateLargeNumberOfConcurrent());
+
         return transports;
     }
 
-    @After
-    public void tearDown() {
-        if (stompSession.isConnected()) stompSession.disconnect();
-        if (stompClient.isRunning()) stompClient.stop();
+    private Transport toSimulateLargeNumberOfConcurrent() {
+        final HttpClient httpClient = new HttpClient();
+        httpClient.setMaxConnectionsPerDestination(1000);
+        httpClient.setExecutor(new QueuedThreadPool(1000));
+
+        return new JettyXhrTransport(httpClient);
+    }
+
+    class DefaultStompFrameHandler implements StompFrameHandler {
+        public Type getPayloadType(StompHeaders stompHeaders) {
+            return Message.class;
+        }
+
+        public void handleFrame(StompHeaders stompHeaders, Object o) {
+            result.complete((Message) o);
+        }
     }
 
     @Test
@@ -89,7 +90,7 @@ public class AuthControllerTest {
     }
 
     private void sendToSocket(Object o) {
-        stompSession.send(AuthController.SOURCE, o);
+        stompSession.send(AUTH_END_POINT, o);
     }
 
     private Message getResult() {
@@ -163,7 +164,6 @@ public class AuthControllerTest {
 
     @Test
     @Transactional
-    @Ignore
     public void sendExistingEmailWithCorrectPassword() throws JsonProcessingException {
         sendToSocket(helper.valid());
 
