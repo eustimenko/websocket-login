@@ -78,14 +78,6 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="4" author="ustimenko" context="PROD">
-        <comment>Create PSQL citext extension</comment>
-
-        <sql>
-            CREATE EXTENSION IF NOT EXISTS citext;
-        </sql>
-    </changeSet>
-
     <changeSet id="6" author="ustimenko" context="PROD, QA">
         <comment>Modify test database to be case insensitive</comment>
 
