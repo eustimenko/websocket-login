@@ -1,30 +1,21 @@
+server:
+  port: 8081
 spring:
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration
   jackson:
     serialization:
-      indent_output: true
-    date-format: com.fasterxml.jackson.databind.util.StdDateFormat
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://127.0.0.1:5432/wslogin
-    username: wslogin
-    password: wslogin
-    hikari:
-      connection-timeout: 60000
-      maximum-pool-size: 5
-  jpa:
-    hibernate:
-      ddl-auto: validate
-      naming:
-        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-    show-sql: false
-liquibase:
-  change-log: classpath:/liquibase/db.changelog-master.xml
-  drop-first: false
-  enabled: true
-  url: jdbc:postgresql://127.0.0.1:5432/wslogin
-  user: wslogin
-  password: wslogin
-  contexts: PROD
+      write_dates_as_timestamps: false
+    date-format: java.text.SimpleDateFormat
+  profiles:
+    active: development
+  main:
+    banner-mode: "off"
+---
+spring:
+  profiles: development
+server:
+  address: localhost
+---
+spring:
+  profiles: production
+server:
+  address: localhost

@@ -1,9 +1,0 @@
-pluginManagement.repositories {
-    maven { url 'http://repo.spring.io/libs-snapshot' }
-    maven { url 'http://jcenter.bintray.com' }
-    maven { url 'https://jitpack.io' }
-    gradlePluginPortal()
-}
-
-rootProject.name = 'wslogin'
-

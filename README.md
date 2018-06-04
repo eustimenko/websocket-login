@@ -1,33 +1,18 @@
-## Dependencies
+##Web Socket Login Backend Module
 
-The work on the project consists of the following
+###Build process
 
-1. Java 1.8
-1. [PostgreSQL 9.+](https://www.codementor.io/devops/tutorial/getting-started-postgresql-server-mac-osx) 
+- `mvn clean install` or `mvn clean install -Dmaven.test.skip=true`
+- `java -jar target/auth-0.0.1.jar`
 
-## Configure environment
+###Test process
 
-### Postgresql
-1. `brew install postgresql`
-1. `psql postgres`
-1. Under `psql`-console type the following
-    ```postgresql
-    create role wslogin with login password 'wslogin';
-    create database wslogin;
-    GRANT ALL PRIVILEGES ON DATABASE wslogin TO wslogin;
+- `mvn clean test`
 
-    \q
-    ```
-1. `psql wslogin`
-1.  Under `psql`-console type `create extension citext`;
+###Production deploy
 
-## Build, launch, tests
+- You should add datasource for production profile, you can see `com.eustimenko.services.auth.configuration.DatasourceConfiguration.mongoTemplate`.
+- Also, you can correct `application.yaml` to add mongo datasource for production profile by [spring boot configuration](https://docs.spring.io/spring-boot/docs/current/reference/html/common-application-properties.html)
 
-- To test launch via command line `./gradlew test`
-
-## TODO
-- fix integration tests
-- wide tests
-- create separate session for separate logged in user
-- connect messages via sequence_id vice versa
-- configure web sockets via `.yaml`
+### Additional Information
+Use `base64-encoding` to store passwords, see org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder.encode
