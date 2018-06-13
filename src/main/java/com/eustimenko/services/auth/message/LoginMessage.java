@@ -9,7 +9,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 public class LoginMessage extends Message {
 
     @Valid

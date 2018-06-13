@@ -5,6 +5,7 @@ import com.eustimenko.services.auth.message.data.ErrorType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -13,7 +14,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class AuthControllerExceptionAdvice extends ResponseEntityExceptionHandler {
 
     @MessageExceptionHandler(UserNotFoundException.class)
-    @SendTo("/topic/logged")
+    @SendToUser("/queue/errors")
     public Message handleUserNotFoundException(UserNotFoundException ex) {
         log.error("{}", ex.getClass().getName());
         final Message response = new ErrorMessage(ex.data, ErrorType.CUSTOMER_NOT_FOUND);
@@ -22,7 +23,7 @@ public class AuthControllerExceptionAdvice extends ResponseEntityExceptionHandle
     }
 
     @MessageExceptionHandler(MethodArgumentNotValidException.class)
-    @SendTo("/topic/logged")
+    @SendToUser("/queue/errors")
     public Message handleArgumentsValidationException(MethodArgumentNotValidException ex) {
         log.error("{}", ex.getClass().getName());
         final Message response = new ErrorMessage(ErrorType.INCORRECT_REQUEST_FORMAT);
