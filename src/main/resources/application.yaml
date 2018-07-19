@@ -17,6 +17,7 @@ spring:
   profiles: development
 server:
   address: localhost
+debug: true
 ---
 spring:
   profiles: production
