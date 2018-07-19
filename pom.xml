@@ -9,21 +9,22 @@
     <packaging>jar</packaging>
 
     <name>auth</name>
-    <description>Authentication service vs websockets</description>
+    <description>Authentication service via web sockets</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
         <java.version>1.8</java.version>
-        <spring-boot.version>2.0.2.RELEASE</spring-boot.version>
-        <spring.security.core.version>5.0.3.RELEASE</spring.security.core.version>
+        <spring-boot.version>2.0.3.RELEASE</spring-boot.version>
+        <spring.security.core.version>5.0.6.RELEASE</spring.security.core.version>
+        <spring.session.version>1.3.3.RELEASE</spring.session.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -36,6 +37,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -66,6 +72,11 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
             <version>${spring.security.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session</artifactId>
+            <version>${spring.session.version}</version>
         </dependency>
     </dependencies>
 

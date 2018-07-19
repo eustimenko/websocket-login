@@ -27,7 +27,10 @@ public class AuthControllerValidationTest extends WebControllerBaseTest {
 
     @Test
     public void validateRequestType() throws InterruptedException, ExecutionException, TimeoutException {
-        createStompSession(new User("", ""));
+        final StompSession stompSession = getNewSession();
+
+        stompSession.subscribe(SUBSCRIBE_LOGIN_ENDPOINT, new ErrorMessageHandler(completableFuture));
+        stompSession.send(SEND_LOGIN_ENDPOINT, new User("", ""));
 
         final ErrorMessage result = completableFuture.get(10, SECONDS);
 
@@ -36,16 +39,13 @@ public class AuthControllerValidationTest extends WebControllerBaseTest {
         assertEquals(ErrorType.INCORRECT_REQUEST_FORMAT, result.getData());
     }
 
-    private void createStompSession(Object o) throws InterruptedException, ExecutionException, TimeoutException {
-        final StompSession stompSession = getNewSession();
-
-        stompSession.subscribe(SUBSCRIBE_ERROR_ENDPOINT, new ErrorMessageHandler(completableFuture));
-        stompSession.send(SEND_LOGIN_ENDPOINT, o);
-    }
-
     @Test
     public void validateRequestMessageType() throws InterruptedException, ExecutionException, TimeoutException {
-        createStompSession(new UserMessage("123", new Token("123", LocalDateTime.now(), "user@user.com")));
+        final StompSession stompSession = getNewSession();
+
+        stompSession.subscribe(SUBSCRIBE_LOGIN_ENDPOINT, new ErrorMessageHandler(completableFuture));
+        stompSession.send(SEND_LOGIN_ENDPOINT,
+                new UserMessage("123", new Token("123", LocalDateTime.now(), "user@user.com")));
 
         final ErrorMessage result = completableFuture.get(10, SECONDS);
 
@@ -56,7 +56,10 @@ public class AuthControllerValidationTest extends WebControllerBaseTest {
 
     @Test
     public void validateEmail() throws InterruptedException, ExecutionException, TimeoutException {
-        createStompSession(new LoginMessage("123", new User("user", "password")));
+        final StompSession stompSession = getNewSession();
+
+        stompSession.subscribe(SUBSCRIBE_LOGIN_ENDPOINT, new ErrorMessageHandler(completableFuture));
+        stompSession.send(SEND_LOGIN_ENDPOINT, new LoginMessage("123", new User("user", "password")));
 
         final ErrorMessage result = completableFuture.get(10, SECONDS);
 
@@ -67,7 +70,10 @@ public class AuthControllerValidationTest extends WebControllerBaseTest {
 
     @Test
     public void validateEmptyCredentials() throws InterruptedException, ExecutionException, TimeoutException {
-        createStompSession(new LoginMessage("", new User("user@user.com", "password")));
+        final StompSession stompSession = getNewSession();
+
+        stompSession.subscribe(SUBSCRIBE_LOGIN_ENDPOINT, new ErrorMessageHandler(completableFuture));
+        stompSession.send(SEND_LOGIN_ENDPOINT, new LoginMessage("123", new User("", "")));
 
         final ErrorMessage result = completableFuture.get(10, SECONDS);
 
@@ -78,7 +84,10 @@ public class AuthControllerValidationTest extends WebControllerBaseTest {
 
     @Test
     public void validateEmptySequence() throws InterruptedException, ExecutionException, TimeoutException {
-        createStompSession(new LoginMessage("", new User("user@user.com", "password")));
+        final StompSession stompSession = getNewSession();
+
+        stompSession.subscribe(SUBSCRIBE_LOGIN_ENDPOINT, new ErrorMessageHandler(completableFuture));
+        stompSession.send(SEND_LOGIN_ENDPOINT, new LoginMessage("", new User("user@user.com", "password")));
 
         final ErrorMessage result = completableFuture.get(10, SECONDS);
 
@@ -89,7 +98,11 @@ public class AuthControllerValidationTest extends WebControllerBaseTest {
 
     @Test
     public void testCustomerNotFound() throws InterruptedException, ExecutionException, TimeoutException {
-        createStompSession(new LoginMessage("123", new User("user2@user.com", "withInsertedPassword")));
+        final StompSession stompSession = getNewSession();
+
+        stompSession.subscribe(SUBSCRIBE_LOGIN_ENDPOINT, new ErrorMessageHandler(completableFuture));
+        stompSession.send(SEND_LOGIN_ENDPOINT,
+                new LoginMessage("123", new User("user2@user.com", "withInsertedPassword")));
 
         final ErrorMessage result = completableFuture.get(10, SECONDS);
 
@@ -105,7 +118,11 @@ public class AuthControllerValidationTest extends WebControllerBaseTest {
         final User user = new User("user2@user.com", passwordEncoder.encode("withInsertedPassword"));
         repository.save(user);
 
-        createStompSession(new LoginMessage("123", new User("user2@user.com", "wrongPassword")));
+        final StompSession stompSession = getNewSession();
+
+        stompSession.subscribe(SUBSCRIBE_LOGIN_ENDPOINT, new ErrorMessageHandler(completableFuture));
+        stompSession.send(SEND_LOGIN_ENDPOINT,
+                new LoginMessage("123", new User("user2@user.com", "wrongPassword")));
 
         final ErrorMessage result = completableFuture.get(10, SECONDS);
 
@@ -114,4 +131,5 @@ public class AuthControllerValidationTest extends WebControllerBaseTest {
         assertEquals("123", result.getSequenceId());
         assertEquals(ErrorType.CUSTOMER_NOT_FOUND, result.getData());
     }
+
 }

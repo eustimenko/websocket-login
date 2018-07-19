@@ -9,6 +9,9 @@ spring:
     active: development
   main:
     banner-mode: "off"
+external:
+    expired: 15
+    session: 60
 ---
 spring:
   profiles: development
