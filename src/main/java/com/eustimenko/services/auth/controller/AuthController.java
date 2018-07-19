@@ -23,9 +23,9 @@ public class AuthController {
     @MessageMapping("/login")
     @SendTo("/topic/logged")
     public Message auth(@Valid LoginMessage message) {
-        log.info("{}", message);
+        log.debug("{}", message);
         final Message response = authService.auth(message);
-        log.info("{}", response);
+        log.debug("{}", response);
         return response;
     }
 }
