@@ -7,7 +7,6 @@ import com.eustimenko.services.auth.repository.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -25,15 +24,9 @@ public class DefaultTokenService implements TokenService {
         this.properties = properties;
     }
 
-    private LocalDateTime tokenExpiredTime;
-
-    @PostConstruct
-    public void configure() {
-        this.tokenExpiredTime = LocalDateTime.now().plus(properties.getExpired(), ChronoUnit.MINUTES);
-    }
-
     public Token newToken(String email, String password) {
         final String encrypted = encryptor.encrypt(email, password);
+        final LocalDateTime tokenExpiredTime = LocalDateTime.now().plus(properties.getExpired(), ChronoUnit.MINUTES);
         final Token token = new Token(encrypted, tokenExpiredTime, email);
 
         return tokenRepository.save(token);
