@@ -71,8 +71,7 @@ public class AuthControllerTest extends WebControllerBaseTest {
             });
         }
 
-        final List<Future<Void>> futures = threads.invokeAll(torun);
-
+        threads.invokeAll(torun);
         threads.shutdown();
     }
 }

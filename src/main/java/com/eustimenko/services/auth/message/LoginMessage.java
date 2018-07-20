@@ -18,7 +18,8 @@ public class LoginMessage extends Message {
 
     @JsonCreator
     public LoginMessage(@JsonProperty("sequence_id") String sequenceId,
-                        @JsonProperty("data") User data) {
+                        @JsonProperty("data") User data
+    ) {
         super(MessageType.LOGIN_CUSTOMER, sequenceId);
         this.data = data;
     }
