@@ -11,13 +11,12 @@ spring:
     banner-mode: "off"
 external:
     expired: 15
-    session: 60
+    session: 1800
 ---
 spring:
   profiles: development
 server:
   address: localhost
-debug: true
 ---
 spring:
   profiles: production

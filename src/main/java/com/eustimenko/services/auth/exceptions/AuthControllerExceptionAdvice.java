@@ -13,20 +13,20 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class AuthControllerExceptionAdvice extends ResponseEntityExceptionHandler {
 
     @MessageExceptionHandler(UserNotFoundException.class)
-    @SendTo("/topic/logged")
+    @SendTo("/topic/error")
     public Message handleUserNotFoundException(UserNotFoundException ex) {
         log.error("{}", ex.getClass().getName());
         final Message response = new ErrorMessage(ex.data, ErrorType.CUSTOMER_NOT_FOUND);
-        log.debug("Sent to /topic/logged {}", response);
+        log.debug("Sent error {}", response);
         return response;
     }
 
     @MessageExceptionHandler(MethodArgumentNotValidException.class)
-    @SendTo("/topic/logged")
+    @SendTo("/topic/error")
     public Message handleArgumentsValidationException(MethodArgumentNotValidException ex) {
         log.error("{}", ex.getClass().getName());
         final Message response = new ErrorMessage(ErrorType.INCORRECT_REQUEST_FORMAT);
-        log.debug("Sent to /topic/logged {}", response);
+        log.debug("Sent error {}", response);
         return response;
     }
 }

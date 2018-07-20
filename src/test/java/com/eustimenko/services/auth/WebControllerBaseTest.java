@@ -24,8 +24,10 @@ import static org.junit.Assert.assertNotNull;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class WebControllerBaseTest {
 
-    static final String SUBSCRIBE_LOGIN_ENDPOINT = "/topic/logged";
+    static final String SUBSCRIBE_ERROR_ENDPOINT = "/topic/error";
+    static final String SUBSCRIBE_LOGIN_ENDPOINT = "/user/queue/reply";
     static final String SEND_LOGIN_ENDPOINT = "/app/login";
+    static final int USERS_NUMBER = 10;
 
     @LocalServerPort
     protected int port = 1234;
